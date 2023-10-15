@@ -1,0 +1,57 @@
+include .env
+
+stop_containers:
+	@echo "Stopping docker containers"
+	if [ $$(docker ps -q) ]; then \
+		echo "containers stopped successfully"; \
+		docker stop $$(docker ps -q); \
+	else \
+		echo "no containers running"; \
+	fi
+
+create_docker_container:
+	docker run --name ${DB_DOCKER_CONTAINER} -p 5433:5432 -e POSTGRES_USER=${USER} -e POSTGRES_PASSWORD=${PASSWORD} -d postgres:12-alpine
+
+create_db:
+	docker exec -it ${DB_DOCKER_CONTAINER} createdb --username=${USER} --owner=${USER} ${DB_NAME}
+
+start_container:
+	docker start ${DB_DOCKER_CONTAINER}
+
+create_migrations:
+	sqlx migrate add -r init
+
+migrate_up:
+	sqlx migrate run --database-url "postgres://${USER}:${PASSWORD}@${HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
+
+migrate_down:
+	sqlx migrate revert --database-url "postgres://${USER}:${PASSWORD}@${HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
+
+connect_db_terminal:
+	docker exec -it hundeverein_db_container psql -U root -d hundeverein_db
+
+tidy:
+	go mod tidy
+
+build:
+	if [ -f "${BINARY}" ]; then \
+		rm ${BINARY}; \
+		echo "Deleted ${BINARY}"; \
+	fi
+	@echo "Building binary..."
+	go build -o ${BINARY} cmd/web/main.go
+
+run: build
+	./${BINARY}
+	@echo "binary started!"
+
+stop:
+	@echo "stopping server..."
+	@-pkill -SIGTERM -f "./${BINARY}"
+	@echo "server stopped."
+
+curl_register:
+	curl -i -X POST http://localhost:5000/register
+
+curl_login: 
+		curl -i -X POST http://localhost:5000/login

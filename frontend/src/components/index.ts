@@ -1,0 +1,12 @@
+import Navbar from "./Navbar"
+import Hero from "./Hero"
+import Gutschein from "./Gutschein"
+import Footer from "./Footer"
+import Loginpop from "./Loginpop"
+import LoginForm from "./LoginForm"
+import RegisterForm from "./RegisterForm"
+import QuizCard from "./QuizCard"
+import Slider from "./Slider"
+import QuizContainer from "./QuizContainer"
+import QuizQuestionTab from "./QuizQuestionTab"
+export {Navbar, Hero, Gutschein, Footer, Loginpop, LoginForm, RegisterForm, QuizCard, Slider, QuizContainer, QuizQuestionTab}
